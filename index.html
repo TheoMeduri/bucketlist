@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Antes de Partir</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+/* ─────────────────────────────────────────
+ANTES DE PARTIR — v4 FINAL
+Conceito: App mobile moderno + Timeline
+Paleta: Violeta #5B21B6 · Azul #1D4ED8 · Branco · Preto quase puro
+Display: Bebas Neue (toda em caps, ultra condensada)
+Body: Outfit (limpa, moderna, sem serifas)
+Meta: Space Mono
+Diferencial: Numeração gigante “bleeding” fora do card,
+linha do tempo à esquerda com dot animado,
+cards que se expandem on-hover com details,
+header com contador que conta ao entrar
+───────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+–v:   #5B21B6;
+–v1:  #7C3AED;
+–v2:  #4C1D95;
+–vl:  #EDE9FE;
+–vll: #F5F3FF;
+–bl:  #1D4ED8;
+–bl1: #2563EB;
+–bll: #DBEAFE;
+–wh:  #FFFFFF;
+–bg:  #FAFAFA;
+–k0:  #09090B;
+–k1:  #18181B;
+–k2:  #27272A;
+–k3:  #52525B;
+–k4:  #A1A1AA;
+–k5:  #D4D4D8;
+–k6:  #E4E4E7;
+–k7:  #F4F4F5;
+–ok:  #15803D;
+–okl: #DCFCE7;
+–er:  #B91C1C;
+–erl: #FEE2E2;
+
+–g: linear-gradient(135deg, var(–v) 0%, var(–bl) 100%);
+–g2: linear-gradient(180deg, var(–v) 0%, var(–bl) 100%);
+–g3: linear-gradient(135deg, #7C3AED 0%, #1D4ED8 100%);
+
+–d: ‘Bebas Neue’, sans-serif;
+–b: ‘Outfit’, sans-serif;
+–m: ‘Space Mono’, monospace;
+
+–ease: cubic-bezier(.4,0,.2,1);
+–spring: cubic-bezier(.34,1.56,.64,1);
+–out: cubic-bezier(0,0,.2,1);
+}
+
+html { height: 100%; }
+body {
+font-family: var(–b);
+background: var(–bg);
+color: var(–k0);
+min-height: 100%;
+-webkit-font-smoothing: antialiased;
+overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════
+LOCK SCREEN
+═══════════════════════════════════════ */
+#lock {
+position: fixed; inset: 0; z-index: 900;
+background: var(–k1);
+display: flex; flex-direction: column;
+align-items: center; justify-content: center;
+gap: 0;
+overflow: hidden;
+}
+#lock::before {
+content: ‘’;
+position: absolute;
+width: 600px; height: 600px;
+background: radial-gradient(circle, rgba(91,33,182,.5) 0%, transparent 70%);
+top: -200px; right: -200px;
+pointer-events: none;
+}
+#lock::after {
+content: ‘’;
+position: absolute;
+width: 500px; height: 500px;
+background: radial-gradient(circle, rgba(29,78,216,.4) 0%, transparent 70%);
+bottom: -150px; left: -150px;
+pointer-events: none;
+}
+
+.lock-center {
+position: relative; z-index: 1;
+display: flex; flex-direction: column;
+align-items: center; gap: 40px;
+padding: 0 24px;
+width: 100%; max-width: 380px;
+}
+
+.lock-wordmark {
+text-align: center;
+animation: lockFadeUp .7s var(–spring) both;
+}
+.lock-symbol {
+font-family: var(–d);
+font-size: 5rem; line-height: 1;
+background: var(–g);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+display: block; margin-bottom: 8px;
+letter-spacing: .05em;
+}
+.lock-name {
+font-family: var(–d);
+font-size: 2.8rem; line-height: .9;
+letter-spacing: .06em;
+color: var(–wh);
+}
+.lock-name span { color: var(–v1); }
+.lock-sub {
+font-family: var(–m);
+font-size: .65rem; color: var(–k4);
+letter-spacing: .12em; text-transform: uppercase;
+margin-top: 10px;
+}
+
+/* PIN display */
+.pin-track {
+display: flex; gap: 14px;
+animation: lockFadeUp .7s .1s var(–spring) both;
+}
+.pin-cell {
+width: 60px; height: 70px;
+border: 2px solid rgba(255,255,255,.1);
+border-radius: 16px;
+background: rgba(255,255,255,.05);
+display: flex; align-items: center; justify-content: center;
+font-size: 2rem; color: var(–v1);
+transition: all .2s var(–spring);
+backdrop-filter: blur(8px);
+}
+.pin-cell.lit {
+border-color: var(–v1);
+background: rgba(124,58,237,.15);
+transform: scale(1.06);
+box-shadow: 0 0 0 4px rgba(124,58,237,.2), 0 8px 24px rgba(124,58,237,.25);
+}
+
+/* Keypad */
+.keypad {
+display: grid; grid-template-columns: repeat(3, 74px); gap: 12px;
+animation: lockFadeUp .7s .18s var(–spring) both;
+}
+.keypad.shake { animation: kShake .35s ease; }
+@keyframes kShake {
+15%{transform:translateX(-8px)} 35%{transform:translateX(8px)}
+55%{transform:translateX(-5px)} 75%{transform:translateX(4px)} to{transform:none}
+}
+
+.kkey {
+height: 66px;
+background: rgba(255,255,255,.06);
+border: 1.5px solid rgba(255,255,255,.08);
+border-radius: 16px;
+font-family: var(–d);
+font-size: 1.8rem; letter-spacing: .04em;
+color: var(–wh);
+cursor: pointer;
+transition: all .18s var(–spring);
+display: flex; align-items: center; justify-content: center;
+backdrop-filter: blur(4px);
+user-select: none;
+position: relative; overflow: hidden;
+}
+.kkey::after {
+content: ‘’;
+position: absolute; inset: 0;
+background: var(–g);
+opacity: 0;
+transition: opacity .18s;
+}
+.kkey:hover { border-color: var(–v1); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(124,58,237,.35); }
+.kkey:hover::after { opacity: 1; }
+.kkey:active { transform: scale(.91); }
+.kkey span { position: relative; z-index: 1; }
+.kkey.kdel { font-family: var(–b); font-size: .9rem; color: var(–k4); }
+.kkey.kdel:hover { border-color: var(–er); box-shadow: 0 8px 24px rgba(185,28,28,.25); }
+.kkey.kdel:hover::after { background: var(–er); }
+.kkey.kghost { visibility: hidden; pointer-events: none; }
+
+.lock-err {
+font-family: var(–m); font-size: .68rem;
+color: #F87171; opacity: 0; transition: opacity .2s;
+letter-spacing: .06em;
+animation: lockFadeUp .7s .26s var(–spring) both;
+}
+
+#lock.exit {
+animation: lockExit .55s var(–ease) forwards;
+}
+@keyframes lockExit {
+to { opacity: 0; transform: scale(.96); }
+}
+
+@keyframes lockFadeUp {
+from { opacity: 0; transform: translateY(20px); }
+to   { opacity: 1; transform: none; }
+}
+
+/* ═══════════════════════════════════════
+APP SHELL — Mobile-first, centered
+═══════════════════════════════════════ */
+#app {
+display: none;
+max-width: 520px;
+margin: 0 auto;
+min-height: 100vh;
+padding-bottom: 80px;
+}
+#app.show {
+display: block;
+animation: appReveal .6s var(–out) both;
+}
+@keyframes appReveal {
+from { opacity: 0; transform: translateY(24px); }
+to   { opacity: 1; transform: none; }
+}
+
+/* ═══════════════════════════════════════
+HEADER
+═══════════════════════════════════════ */
+.hdr {
+background: var(–k0);
+padding: 48px 28px 36px;
+position: relative;
+overflow: hidden;
+}
+.hdr::after {
+content: ‘’;
+position: absolute; bottom: 0; left: 0; right: 0;
+height: 3px;
+background: var(–g);
+}
+.hdr-top {
+display: flex; align-items: center; justify-content: space-between;
+margin-bottom: 28px;
+}
+.hdr-logo {
+font-family: var(–m); font-size: .62rem;
+color: var(–k4); letter-spacing: .15em;
+text-transform: uppercase;
+display: flex; align-items: center; gap: 8px;
+}
+.hdr-logo-dot {
+width: 8px; height: 8px; border-radius: 50%;
+background: var(–g);
+animation: dotPulse 2s ease infinite;
+}
+@keyframes dotPulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.6);opacity:.5} }
+
+.sync-chip {
+font-family: var(–m); font-size: .58rem;
+padding: 5px 12px; border-radius: 99px;
+display: flex; align-items: center; gap: 6px;
+background: rgba(255,255,255,.06);
+color: var(–k4);
+border: 1px solid rgba(255,255,255,.08);
+transition: all .3s;
+}
+.sync-chip.ok  { background: rgba(21,128,61,.15); color: #4ADE80; border-color: rgba(74,222,128,.2); }
+.sync-chip.ing { background: rgba(91,33,182,.2);  color: var(–v1); border-color: rgba(124,58,237,.3); }
+.sync-chip.err { background: rgba(185,28,28,.15); color: #F87171;  border-color: rgba(248,113,113,.2); }
+.sync-led { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: dotPulse 1.6s ease infinite; }
+.sync-led.still { animation: none; }
+
+/* Big counter */
+.hdr-counter {
+margin-bottom: 20px;
+}
+.hdr-count-n {
+font-family: var(–d);
+font-size: 7rem; line-height: .85;
+letter-spacing: -.01em;
+background: var(–g);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+display: block;
+}
+.hdr-count-lbl {
+font-family: var(–b); font-size: .8rem; font-weight: 500;
+color: var(–k4); letter-spacing: .06em;
+text-transform: uppercase;
+}
+
+.hdr-title {
+font-family: var(–d);
+font-size: 3.6rem; line-height: .9;
+letter-spacing: .04em;
+color: var(–wh);
+text-transform: uppercase;
+}
+.hdr-title .accent { color: var(–v1); }
+
+/* Stats row */
+.stats-row {
+display: flex; gap: 0;
+margin-top: 28px;
+border: 1px solid rgba(255,255,255,.08);
+border-radius: 16px;
+overflow: hidden;
+}
+.stat-block {
+flex: 1; padding: 14px 16px;
+border-right: 1px solid rgba(255,255,255,.08);
+}
+.stat-block:last-child { border-right: none; }
+.stat-n {
+font-family: var(–d);
+font-size: 2.2rem; line-height: 1;
+color: var(–wh); display: block;
+}
+.stat-n.done-clr { color: #4ADE80; }
+.stat-n.left-clr { color: var(–v1); }
+.stat-l {
+font-family: var(–m); font-size: .55rem;
+color: var(–k4); text-transform: uppercase; letter-spacing: .1em;
+margin-top: 3px;
+}
+
+/* Progress bar */
+.prog-wrap {
+margin-top: 20px;
+background: rgba(255,255,255,.06);
+border-radius: 99px;
+height: 6px;
+overflow: hidden;
+}
+.prog-fill {
+height: 100%;
+background: var(–g);
+border-radius: 99px;
+transition: width 1.2s var(–ease);
+position: relative;
+}
+.prog-fill::after {
+content: ‘’;
+position: absolute; inset: 0;
+background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.3) 50%, transparent 100%);
+animation: shimmer 2.2s ease infinite;
+}
+@keyframes shimmer { from{transform:translateX(-100%)} to{transform:translateX(100%)} }
+.prog-label {
+display: flex; justify-content: space-between;
+margin-top: 8px;
+font-family: var(–m); font-size: .6rem; color: var(–k4);
+}
+
+/* ═══════════════════════════════════════
+TOOLBAR
+═══════════════════════════════════════ */
+.toolbar {
+padding: 20px 28px 12px;
+display: flex; align-items: center; gap: 12px;
+}
+.btn-add {
+flex-shrink: 0;
+display: flex; align-items: center; gap: 8px;
+background: var(–g);
+color: var(–wh); border: none;
+border-radius: 14px;
+padding: 13px 22px;
+font-family: var(–b); font-size: .9rem; font-weight: 700;
+cursor: pointer;
+transition: all .25s var(–spring);
+box-shadow: 0 4px 20px rgba(91,33,182,.3);
+position: relative; overflow: hidden;
+white-space: nowrap;
+}
+.btn-add::before {
+content: ‘’;
+position: absolute; inset: 0;
+background: rgba(255,255,255,.12);
+transform: translateX(-110%) skewX(-20deg);
+transition: transform .4s var(–ease);
+}
+.btn-add:hover::before { transform: translateX(110%) skewX(-20deg); }
+.btn-add:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(91,33,182,.45); }
+.btn-add:active { transform: scale(.96); }
+.btn-add-plus {
+width: 22px; height: 22px;
+background: rgba(255,255,255,.2);
+border-radius: 7px;
+display: flex; align-items: center; justify-content: center;
+font-size: 1.1rem; line-height: 1;
+transition: transform .3s var(–spring);
+}
+.btn-add:hover .btn-add-plus { transform: rotate(90deg); }
+
+/* Filters scroll */
+.filters {
+display: flex; gap: 8px;
+overflow-x: auto; flex: 1;
+scrollbar-width: none;
+-ms-overflow-style: none;
+padding-bottom: 2px;
+}
+.filters::-webkit-scrollbar { display: none; }
+.fchip {
+white-space: nowrap;
+font-family: var(–b); font-size: .72rem; font-weight: 600;
+padding: 8px 14px; border-radius: 99px;
+border: 1.5px solid var(–k6);
+background: var(–wh); color: var(–k3);
+cursor: pointer; flex-shrink: 0;
+transition: all .2s var(–spring);
+display: flex; align-items: center; gap: 5px;
+}
+.fchip:hover { border-color: var(–v1); color: var(–v); transform: translateY(-1px); }
+.fchip.on {
+background: var(–k0); color: var(–wh);
+border-color: var(–k0);
+box-shadow: 0 4px 12px rgba(0,0,0,.2);
+}
+
+/* ═══════════════════════════════════════
+TIMELINE LIST
+═══════════════════════════════════════ */
+.tl-wrap {
+padding: 16px 28px 0;
+position: relative;
+}
+
+/* The vertical line */
+.tl-wrap::before {
+content: ‘’;
+position: absolute;
+left: 49px; top: 0; bottom: 0;
+width: 2px;
+background: linear-gradient(to bottom, transparent 0%, var(–k5) 8%, var(–k5) 92%, transparent 100%);
+pointer-events: none;
+}
+
+/* ═══════════════════════════════════════
+TIMELINE ITEM
+═══════════════════════════════════════ */
+.tl-item {
+display: grid;
+grid-template-columns: 42px 1fr;
+gap: 0 20px;
+padding: 0 0 20px;
+position: relative;
+opacity: 0;
+transform: translateY(20px);
+}
+.tl-item.in {
+animation: tlIn .5s var(–spring) forwards;
+}
+@keyframes tlIn {
+to { opacity: 1; transform: none; }
+}
+.tl-item.out {
+animation: tlOut .28s var(–ease) forwards;
+}
+@keyframes tlOut {
+to { opacity: 0; transform: translateX(16px); }
+}
+
+/* Left: number + dot */
+.tl-left {
+display: flex; flex-direction: column;
+align-items: center; gap: 8px;
+padding-top: 22px;
+position: relative; z-index: 1;
+}
+.tl-num {
+font-family: var(–d);
+font-size: .95rem; line-height: 1;
+color: var(–k4);
+letter-spacing: .04em;
+transition: color .2s;
+}
+.tl-dot {
+width: 14px; height: 14px;
+border-radius: 50%;
+background: var(–wh);
+border: 2.5px solid var(–k5);
+transition: all .25s var(–spring);
+flex-shrink: 0;
+position: relative;
+}
+/* Pulse ring on hover */
+.tl-dot::after {
+content: ‘’;
+position: absolute; inset: -5px;
+border-radius: 50%;
+border: 2px solid var(–v1);
+opacity: 0;
+transform: scale(.7);
+transition: all .25s var(–spring);
+}
+.tl-item:hover .tl-dot {
+border-color: var(–v1);
+background: var(–v1);
+transform: scale(1.3);
+}
+.tl-item:hover .tl-dot::after { opacity: .3; transform: scale(1); }
+.tl-item.done .tl-dot { background: var(–ok); border-color: var(–ok); }
+.tl-item:hover .tl-num { color: var(–v); }
+
+/* Right: card */
+.tl-card {
+background: var(–wh);
+border-radius: 20px;
+border: 1.5px solid var(–k6);
+overflow: hidden;
+transition: border-color .2s, box-shadow .25s, transform .3s var(–spring);
+cursor: pointer;
+}
+.tl-card:hover {
+border-color: rgba(91,33,182,.25);
+box-shadow: 0 8px 32px rgba(91,33,182,.12), 0 2px 8px rgba(0,0,0,.06);
+transform: translateY(-3px) translateX(2px);
+}
+
+/* Category color strip */
+.tl-strip {
+height: 4px;
+background: var(–cat-clr, var(–g));
+width: 100%;
+}
+
+.tl-card-body { padding: 16px 18px 14px; }
+
+.tl-meta {
+display: flex; align-items: center; gap: 8px;
+margin-bottom: 10px;
+}
+.tl-cat {
+font-family: var(–m); font-size: .58rem;
+padding: 3px 10px; border-radius: 99px;
+background: var(–k7); color: var(–k3);
+display: flex; align-items: center; gap: 4px;
+letter-spacing: .04em;
+}
+.tl-date {
+font-family: var(–m); font-size: .55rem;
+color: var(–k4);
+margin-left: auto;
+letter-spacing: .04em;
+}
+
+.tl-title {
+font-family: var(–b);
+font-size: 1.05rem; font-weight: 700;
+color: var(–k0); line-height: 1.35;
+transition: color .2s;
+}
+.tl-item.done .tl-title {
+text-decoration: line-through;
+color: var(–k4);
+}
+
+.tl-desc {
+font-size: .8rem; font-weight: 400;
+color: var(–k3); line-height: 1.6;
+margin-top: 8px;
+max-height: 0;
+overflow: hidden;
+transition: max-height .35s var(–ease), opacity .25s;
+opacity: 0;
+}
+.tl-item:hover .tl-desc,
+.tl-item.expanded .tl-desc {
+max-height: 120px;
+opacity: 1;
+}
+
+/* Card actions */
+.tl-actions {
+display: flex; gap: 0;
+border-top: 1px solid var(–k6);
+margin-top: 14px;
+max-height: 0; overflow: hidden;
+transition: max-height .3s var(–ease);
+}
+.tl-item:hover .tl-actions,
+.tl-item.expanded .tl-actions {
+max-height: 60px;
+}
+.tl-act {
+flex: 1; padding: 11px 8px;
+border: none; background: transparent;
+font-family: var(–b); font-size: .72rem; font-weight: 600;
+color: var(–k3); cursor: pointer;
+transition: all .18s;
+display: flex; align-items: center; justify-content: center; gap: 5px;
+border-right: 1px solid var(–k6);
+}
+.tl-act:last-child { border-right: none; }
+.tl-act:hover { background: var(–k7); }
+.tl-act.done-act:hover { background: var(–okl); color: var(–ok); }
+.tl-act.done-act.active { background: var(–okl); color: var(–ok); }
+.tl-act.edit-act:hover { background: var(–vll); color: var(–v); }
+.tl-act.del-act:hover  { background: var(–erl); color: var(–er); }
+
+/* ═══════════════════════════════════════
+EMPTY
+═══════════════════════════════════════ */
+#empty {
+display: none;
+flex-direction: column; align-items: center;
+padding: 60px 24px; text-align: center;
+}
+.empty-icon {
+font-family: var(–d);
+font-size: 6rem; line-height: 1;
+background: var(–g);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+margin-bottom: 16px;
+animation: emptyFloat 3s ease infinite;
+}
+@keyframes emptyFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+#empty h3 {
+font-family: var(–d); font-size: 2rem;
+color: var(–k0); letter-spacing: .06em;
+}
+#empty p {
+font-size: .85rem; color: var(–k3);
+max-width: 260px; margin: 10px auto 0; line-height: 1.65;
+}
+
+/* ═══════════════════════════════════════
+FAB (mobile fixed button)
+═══════════════════════════════════════ */
+.fab {
+position: fixed; bottom: 28px; right: 28px; z-index: 100;
+width: 58px; height: 58px;
+border-radius: 18px;
+background: var(–g);
+color: var(–wh); border: none;
+font-size: 1.6rem; font-weight: 300;
+cursor: pointer;
+display: none;
+align-items: center; justify-content: center;
+box-shadow: 0 8px 28px rgba(91,33,182,.45);
+transition: all .25s var(–spring);
+}
+.fab:hover { transform: scale(1.08) rotate(90deg); box-shadow: 0 12px 36px rgba(91,33,182,.55); }
+.fab:active { transform: scale(.93); }
+@media(max-width:540px){ .fab{ display:flex; } }
+
+/* ═══════════════════════════════════════
+MODAL
+═══════════════════════════════════════ */
+#modal {
+position: fixed; inset: 0; z-index: 800;
+background: rgba(9,9,11,.55);
+backdrop-filter: blur(18px) saturate(1.5);
+-webkit-backdrop-filter: blur(18px) saturate(1.5);
+display: flex; align-items: flex-end;
+opacity: 0; pointer-events: none;
+transition: opacity .25s;
+}
+@media(min-width:541px){
+#modal { align-items: center; justify-content: center; padding: 24px; }
+}
+#modal.open { opacity: 1; pointer-events: all; }
+#modal.open .modal-sheet { transform: none; opacity: 1; }
+
+.modal-sheet {
+background: var(–wh);
+border-radius: 28px 28px 0 0;
+width: 100%;
+max-width: 520px;
+max-height: 92vh;
+overflow-y: auto;
+transform: translateY(40px);
+opacity: 0;
+transition: all .38s var(–spring);
+position: relative;
+}
+@media(min-width:541px){
+.modal-sheet { border-radius: 24px; }
+}
+
+.modal-handle {
+width: 36px; height: 4px;
+background: var(–k5);
+border-radius: 99px;
+margin: 14px auto 0;
+}
+@media(min-width:541px){ .modal-handle{ display:none; } }
+
+/* Color strip top */
+.modal-strip {
+height: 4px;
+background: var(–g);
+border-radius: 28px 28px 0 0;
+}
+@media(min-width:541px){ .modal-strip{ border-radius: 24px 24px 0 0; } }
+
+.modal-hdr {
+padding: 20px 24px 16px;
+display: flex; align-items: center; justify-content: space-between;
+border-bottom: 1px solid var(–k6);
+}
+.modal-hdr h2 {
+font-family: var(–d); font-size: 1.7rem;
+color: var(–k0); letter-spacing: .04em;
+}
+.modal-x {
+width: 32px; height: 32px;
+background: var(–k7); border: none; border-radius: 10px;
+color: var(–k3); font-size: .9rem;
+display: flex; align-items: center; justify-content: center;
+cursor: pointer; transition: all .18s var(–spring);
+}
+.modal-x:hover { background: var(–erl); color: var(–er); transform: rotate(90deg); }
+
+.modal-body { padding: 22px 24px 32px; display: flex; flex-direction: column; gap: 18px; }
+.fld { display: flex; flex-direction: column; gap: 7px; }
+.flbl {
+font-family: var(–m); font-size: .62rem;
+letter-spacing: .1em; text-transform: uppercase; color: var(–k3);
+}
+.finp, .fta, .fsel {
+font-family: var(–b); font-size: .9rem; color: var(–k0);
+background: var(–k7); border: 1.5px solid var(–k6);
+border-radius: 13px; padding: 12px 15px;
+outline: none; width: 100%; resize: none;
+transition: border-color .15s, box-shadow .15s, background .15s;
+-webkit-appearance: none;
+}
+.finp::placeholder, .fta::placeholder { color: var(–k4); }
+.finp:focus, .fta:focus, .fsel:focus {
+border-color: var(–v1);
+background: var(–wh);
+box-shadow: 0 0 0 4px rgba(124,58,237,.12);
+}
+.finp.err { border-color: var(–er); animation: fShake .3s ease; }
+@keyframes fShake { 20%{transform:translateX(-5px)} 50%{transform:translateX(5px)} 80%{transform:translateX(-2px)} to{transform:none} }
+.fsel option { background: var(–wh); }
+
+.btn-submit {
+width: 100%; padding: 15px;
+background: var(–g); color: var(–wh); border: none;
+border-radius: 14px;
+font-family: var(–b); font-size: .95rem; font-weight: 700;
+cursor: pointer;
+transition: all .25s var(–spring);
+box-shadow: 0 4px 18px rgba(91,33,182,.28);
+position: relative; overflow: hidden;
+}
+.btn-submit::before {
+content: ‘’;
+position: absolute; inset: 0;
+background: rgba(255,255,255,.13);
+transform: translateX(-110%) skewX(-20deg);
+transition: transform .4s var(–ease);
+}
+.btn-submit:hover::before { transform: translateX(110%) skewX(-20deg); }
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(91,33,182,.4); }
+.btn-submit:active { transform: scale(.97); }
+
+/* ═══════════════════════════════════════
+TOAST
+═══════════════════════════════════════ */
+.toast {
+position: fixed; bottom: 100px; left: 50%;
+transform: translateX(-50%) translateY(20px);
+z-index: 999; white-space: nowrap;
+background: var(–k0); color: var(–wh);
+border-radius: 14px; padding: 12px 20px;
+font-family: var(–b); font-size: .82rem; font-weight: 600;
+display: flex; align-items: center; gap: 9px;
+box-shadow: 0 12px 40px rgba(0,0,0,.3);
+opacity: 0; pointer-events: none;
+transition: transform .38s var(–spring), opacity .3s;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+@media(min-width:541px){ .toast{ bottom: 36px; } }
+</style>
+
+</head>
+<body>
+
+<!-- ══ LOCK ══════════════════════════════════════ -->
+
+<div id="lock">
+  <div class="lock-center">
+    <div class="lock-wordmark">
+      <span class="lock-symbol">✦</span>
+      <div class="lock-name">ANTES DE <span>PARTIR</span></div>
+      <p class="lock-sub">acesso privado — 4 dígitos</p>
+    </div>
+
+```
+<div class="pin-track">
+  <div class="pin-cell" id="pc0"></div>
+  <div class="pin-cell" id="pc1"></div>
+  <div class="pin-cell" id="pc2"></div>
+  <div class="pin-cell" id="pc3"></div>
+</div>
+
+<div class="keypad" id="kpad">
+  <button class="kkey" data-k="1"><span>1</span></button>
+  <button class="kkey" data-k="2"><span>2</span></button>
+  <button class="kkey" data-k="3"><span>3</span></button>
+  <button class="kkey" data-k="4"><span>4</span></button>
+  <button class="kkey" data-k="5"><span>5</span></button>
+  <button class="kkey" data-k="6"><span>6</span></button>
+  <button class="kkey" data-k="7"><span>7</span></button>
+  <button class="kkey" data-k="8"><span>8</span></button>
+  <button class="kkey" data-k="9"><span>9</span></button>
+  <button class="kkey kghost" disabled></button>
+  <button class="kkey" data-k="0"><span>0</span></button>
+  <button class="kkey kdel" data-k="del"><span>⌫</span></button>
+</div>
+
+<p class="lock-err" id="lerr">Senha incorreta — tente novamente</p>
+```
+
+  </div>
+</div>
+
+<!-- ══ APP ═══════════════════════════════════════ -->
+
+<div id="app">
+
+  <!-- HEADER -->
+
+  <header class="hdr">
+    <div class="hdr-top">
+      <div class="hdr-logo">
+        <div class="hdr-logo-dot"></div>
+        ANTES DE PARTIR
+      </div>
+      <div class="sync-chip" id="sync-chip">
+        <div class="sync-led still" id="sync-led"></div>
+        <span id="sync-txt">—</span>
+      </div>
+    </div>
+
+```
+<div class="hdr-counter">
+  <span class="hdr-count-n" id="hdr-n">0</span>
+  <span class="hdr-count-lbl">sonhos na lista</span>
+</div>
+
+<div class="hdr-title">
+  TUDO O QUE<br>QUERO <span class="accent">VIVER</span>
+</div>
+
+<div class="stats-row">
+  <div class="stat-block">
+    <span class="stat-n" id="st-t">0</span>
+    <span class="stat-l">Total</span>
+  </div>
+  <div class="stat-block">
+    <span class="stat-n done-clr" id="st-d">0</span>
+    <span class="stat-l">Feitos</span>
+  </div>
+  <div class="stat-block">
+    <span class="stat-n left-clr" id="st-l">0</span>
+    <span class="stat-l">Restantes</span>
+  </div>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-fill" id="prog" style="width:0%"></div>
+</div>
+<div class="prog-label">
+  <span>Progresso de vida</span>
+  <span id="prog-pct">0%</span>
+</div>
+```
+
+  </header>
+
+  <!-- TOOLBAR -->
+
+  <div class="toolbar">
+    <button class="btn-add" id="btn-add">
+      <span class="btn-add-plus">+</span>
+      Novo sonho
+    </button>
+    <div class="filters" id="filters"></div>
+  </div>
+
+  <!-- TIMELINE -->
+
+  <div class="tl-wrap" id="tl-wrap"></div>
+
+  <!-- EMPTY -->
+
+  <div id="empty">
+    <div class="empty-icon">✦</div>
+    <h3>NENHUM SONHO</h3>
+    <p>Adicione algo que você sempre quis sentir, fazer ou conquistar.</p>
+  </div>
+
+</div>
+
+<!-- FAB -->
+
+<button class="fab" id="fab">+</button>
+
+<!-- ══ MODAL ══════════════════════════════════════ -->
+
+<div id="modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-strip"></div>
+    <div class="modal-hdr">
+      <h2 id="modal-h">NOVO SONHO</h2>
+      <button class="modal-x" id="modal-x">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fld">
+        <label class="flbl">O que você quer fazer?</label>
+        <input id="f-tit" class="finp" type="text" placeholder="Ex: Ver a aurora boreal na Islândia" maxlength="140">
+      </div>
+      <div class="fld">
+        <label class="flbl">Por que importa? (opcional)</label>
+        <textarea id="f-desc" class="fta" rows="3" placeholder="O que faz esse sonho especial pra você..."></textarea>
+      </div>
+      <div class="fld">
+        <label class="flbl">Categoria</label>
+        <select id="f-cat" class="fsel">
+          <option value="aventura">⛰️ Aventura</option>
+          <option value="viagem">✈️ Viagem</option>
+          <option value="arte">🎨 Arte</option>
+          <option value="natureza">🌿 Natureza</option>
+          <option value="pessoas">❤️ Pessoas</option>
+          <option value="conquista">🏆 Conquista</option>
+          <option value="espirito">🌙 Espírito</option>
+          <option value="outro">✦ Outro</option>
+        </select>
+      </div>
+      <button class="btn-submit" id="btn-sub">Adicionar sonho</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <span id="t-i"></span><span id="t-m"></span>
+</div>
+
+<!-- ══ FIREBASE + LÓGICA ══════════════════════════ -->
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, updateDoc, deleteDoc,
+  doc, onSnapshot, query, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ── Firebase ──────────── */
+const fApp = initializeApp({
+  apiKey: "AIzaSyAQoIKSb4g7tXW_xjBrXo-rFokn6yHwAjU",
+  authDomain: "antes-de-partir.firebaseapp.com",
+  projectId: "antes-de-partir",
+  storageBucket: "antes-de-partir.firebasestorage.app",
+  messagingSenderId: "693694702618",
+  appId: "1:693694702618:web:7ca54883d2a673200b1da3"
+});
+const db = getFirestore(fApp);
+
+/* ── Categories ─────────── */
+const CATS = {
+  aventura:  { label:'Aventura',  icon:'⛰️', clr:'#F97316' },
+  viagem:    { label:'Viagem',    icon:'✈️', clr:'#2563EB' },
+  arte:      { label:'Arte',      icon:'🎨', clr:'#7C3AED' },
+  natureza:  { label:'Natureza',  icon:'🌿', clr:'#15803D' },
+  pessoas:   { label:'Pessoas',   icon:'❤️', clr:'#DB2777' },
+  conquista: { label:'Conquista', icon:'🏆', clr:'#CA8A04' },
+  espirito:  { label:'Espírito',  icon:'🌙', clr:'#5B21B6' },
+  outro:     { label:'Outro',     icon:'✦',  clr:'#52525B' },
+};
+
+/* ── State ──────────────── */
+let items  = [];
+let editId = null;
+let filter = 'all';
+
+/* ── Lock ────────────────── */
+const PWD = '0067';
+let typed = '';
+const cells = [0,1,2,3].map(i => document.getElementById('pc'+i));
+const lerr  = document.getElementById('lerr');
+const kpad  = document.getElementById('kpad');
+
+document.querySelectorAll('.kkey').forEach(k => {
+  k.addEventListener('click', () => {
+    const v = k.dataset.k;
+    if (!v) return;
+    if (v === 'del') typed = typed.slice(0,-1);
+    else if (typed.length < 4) typed += v;
+    syncPins();
+    if (typed.length === 4) setTimeout(unlock, 160);
+  });
+});
+
+function syncPins() {
+  cells.forEach((c,i) => {
+    const on = i < typed.length;
+    c.classList.toggle('lit', on);
+    c.textContent = on ? '●' : '';
+  });
+}
+
+function unlock() {
+  if (typed === PWD) {
+    const lock = document.getElementById('lock');
+    lock.classList.add('exit');
+    setTimeout(() => {
+      lock.style.display = 'none';
+      const app = document.getElementById('app');
+      app.classList.add('show');
+      boot();
+    }, 480);
+  } else {
+    lerr.style.opacity = '1';
+    kpad.classList.add('shake');
+    setTimeout(() => {
+      kpad.classList.remove('shake');
+      lerr.style.opacity = '0';
+      typed = ''; syncPins();
+    }, 700);
+  }
+}
+
+/* ── Boot ────────────────── */
+function boot() {
+  buildFilters();
+  document.getElementById('btn-add').addEventListener('click', () => openModal());
+  document.getElementById('fab').addEventListener('click', () => openModal());
+  document.getElementById('modal-x').addEventListener('click', closeModal);
+  document.getElementById('modal').addEventListener('click', e => { if(e.target.id==='modal') closeModal(); });
+  document.getElementById('btn-sub').addEventListener('click', save);
+  document.getElementById('f-tit').addEventListener('keydown', e => { if(e.key==='Enter') save(); });
+  listenDB();
+}
+
+/* ── Filters ─────────────── */
+function buildFilters() {
+  const wrap = document.getElementById('filters');
+  const all = [{k:'all', label:'Todos', icon:'✦'}, ...Object.entries(CATS).map(([k,v])=>({k,label:v.label,icon:v.icon}))];
+  wrap.innerHTML = all.map(f => `<button class="fchip${f.k==='all'?' on':''}" data-f="${f.k}">${f.icon} ${f.label}</button>`).join('');
+  wrap.querySelectorAll('.fchip').forEach(b => {
+    b.addEventListener('click', () => {
+      filter = b.dataset.f;
+      wrap.querySelectorAll('.fchip').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      render();
+    });
+  });
+}
+
+/* ── Firestore listener ─── */
+function setSync(state, txt) {
+  const chip = document.getElementById('sync-chip');
+  const led  = document.getElementById('sync-led');
+  const t    = document.getElementById('sync-txt');
+  chip.className = 'sync-chip ' + state;
+  led.className  = 'sync-led' + (state === 'ing' ? '' : ' still');
+  t.textContent  = txt;
+}
+
+function listenDB() {
+  setSync('ing','Conectando...');
+  const q = query(collection(db,'sonhos'), orderBy('ts','desc'));
+  onSnapshot(q, snap => {
+    items = snap.docs.map(d => ({id:d.id,...d.data()}));
+    render();
+    setSync('ok','Sincronizado');
+  }, err => {
+    console.error(err);
+    setSync('err','Offline');
+  });
+}
+
+/* ── Modal ───────────────── */
+function openModal(item=null) {
+  editId = item ? item.id : null;
+  document.getElementById('modal-h').textContent   = item ? 'EDITAR SONHO' : 'NOVO SONHO';
+  document.getElementById('f-tit').value            = item ? item.title : '';
+  document.getElementById('f-desc').value           = item ? (item.desc||'') : '';
+  document.getElementById('f-cat').value            = item ? (item.cat||'aventura') : 'aventura';
+  document.getElementById('btn-sub').textContent    = item ? 'Salvar alterações' : 'Adicionar sonho';
+  document.getElementById('modal').classList.add('open');
+  setTimeout(() => document.getElementById('f-tit').focus(), 120);
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  editId = null;
+}
+
+async function save() {
+  const title = document.getElementById('f-tit').value.trim();
+  if (!title) {
+    const inp = document.getElementById('f-tit');
+    inp.classList.add('err');
+    inp.focus();
+    setTimeout(() => inp.classList.remove('err'), 500);
+    return;
+  }
+  setSync('ing','Salvando...');
+  const d = {
+    title,
+    desc: document.getElementById('f-desc').value.trim(),
+    cat:  document.getElementById('f-cat').value,
+  };
+  try {
+    if (editId) {
+      await updateDoc(doc(db,'sonhos',editId), d);
+      toast('✦','Sonho atualizado!');
+    } else {
+      await addDoc(collection(db,'sonhos'), {...d, done:false, ts:serverTimestamp()});
+      toast('✦','Sonho adicionado!');
+    }
+    closeModal();
+  } catch(e) {
+    console.error(e);
+    toast('!','Erro — verifique as regras do Firestore');
+    setSync('err','Erro');
+  }
+}
+
+async function toggleDone(id, cur) {
+  setSync('ing','Salvando...');
+  try {
+    await updateDoc(doc(db,'sonhos',id), {done:!cur});
+    toast(cur?'○':'✓', cur?'Desmarcado como feito':'Sonho realizado! 🎉');
+  } catch(e) { toast('!','Erro'); setSync('err','Erro'); }
+}
+
+async function del(id) {
+  const el = document.querySelector(`.tl-item[data-id="${id}"]`);
+  if (el) { el.classList.add('out'); await sleep(250); }
+  setSync('ing','Deletando...');
+  try {
+    await deleteDoc(doc(db,'sonhos',id));
+    toast('✕','Sonho removido');
+  } catch(e) { toast('!','Erro ao deletar'); setSync('err','Erro'); }
+}
+
+/* ── Render ──────────────── */
+function animateCount(el, to) {
+  const from = parseInt(el.textContent)||0;
+  if (from === to) return;
+  const dur = 600, start = performance.now();
+  function step(now) {
+    const p = Math.min((now-start)/dur, 1);
+    const ease = 1 - Math.pow(1-p, 3);
+    el.textContent = Math.round(from + (to-from)*ease);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function render() {
+  const src  = filter==='all' ? items : items.filter(i=>i.cat===filter);
+  const done = items.filter(i=>i.done).length;
+  const pct  = items.length ? Math.round(done/items.length*100) : 0;
+
+  animateCount(document.getElementById('hdr-n'), items.length);
+  animateCount(document.getElementById('st-t'),  items.length);
+  animateCount(document.getElementById('st-d'),  done);
+  animateCount(document.getElementById('st-l'),  items.length-done);
+  document.getElementById('prog').style.width   = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+
+  const wrap  = document.getElementById('tl-wrap');
+  const empty = document.getElementById('empty');
+
+  if (!src.length) {
+    wrap.innerHTML = '';
+    empty.style.display = 'flex';
+    return;
+  }
+  empty.style.display = 'none';
+  wrap.innerHTML = '';
+
+  src.forEach((item, idx) => {
+    const cat = CATS[item.cat] || CATS.outro;
+    const ts  = item.ts?.toDate?.() || new Date();
+    const dateStr = ts.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'2-digit'}).replace('.','/');
+
+    const el = document.createElement('div');
+    el.className = 'tl-item' + (item.done?' done':'');
+    el.dataset.id = item.id;
+    el.style.animationDelay = (idx*.06)+'s';
+
+    el.innerHTML = `
+      <div class="tl-left">
+        <span class="tl-num">${String(idx+1).padStart(2,'0')}</span>
+        <div class="tl-dot"></div>
+      </div>
+      <div class="tl-card">
+        <div class="tl-strip" style="background:${cat.clr}"></div>
+        <div class="tl-card-body">
+          <div class="tl-meta">
+            <span class="tl-cat">${cat.icon} ${cat.label}</span>
+            <span class="tl-date">${dateStr}</span>
+          </div>
+          <div class="tl-title">${esc(item.title)}</div>
+          ${item.desc ? '<div class="tl-desc">'+esc(item.desc)+'</div>' : ''}
+          <div class="tl-actions">
+            <button class="tl-act done-act${item.done?' active':''}">${item.done?'✓ Feito':'○ Feito'}</button>
+            <button class="tl-act edit-act">✎ Editar</button>
+            <button class="tl-act del-act">✕</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    el.querySelector('.done-act').addEventListener('click', e=>{e.stopPropagation();toggleDone(item.id,item.done);});
+    el.querySelector('.edit-act').addEventListener('click', e=>{e.stopPropagation();openModal(item);});
+    el.querySelector('.del-act').addEventListener('click',  e=>{e.stopPropagation();if(confirm('Deletar este sonho?'))del(item.id);});
+
+    wrap.appendChild(el);
+    requestAnimationFrame(()=>el.classList.add('in'));
+  });
+}
+
+/* ── Toast ───────────────── */
+function toast(ico,msg) {
+  document.getElementById('t-i').textContent=ico+' ';
+  document.getElementById('t-m').textContent=msg;
+  const t=document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+</script>
+
+</body>
+</html>
